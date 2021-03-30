@@ -1,9 +1,11 @@
 .header {
     padding-bottom: 20px;
     margin-bottom: 20px;
+    text-align: center;
+
 }
 
-.header > h3, h5 {
+.header > h3, h5, h1, h2 {
     margin: 0;
     padding-top: 20px;
     text-align: center;

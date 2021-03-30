@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="main.css"/>
         <!--Feel free to add more CSS files as needed-->
         <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+        
     </head>
 <body>
     <div class="header">
@@ -14,8 +15,30 @@
     </div>
     <!--  We included a basic HTML structure for the 3 graphs here. Feel free to change this if you'd like  -->
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-9">
+            <td><br></td>
+
+            <h3>Graph 1: Top 10 Most Sold Video Games (All-time)</h2>
             <div id="graph1"></div>
+
+            <h3>Graph 2: Most Popular Video Game Genre per Region</h2>
+                <td><br></td>
+            <em style="font-size: 18px;">Click on button below to change region:</em><br />
+
+            <button type="button" class="btn btn-info" onclick="change_region('NA')">North America </button>
+            <button type="button" class="btn btn-info" onclick="change_region('EU')">Europe</button>
+            <button type="button" class="btn btn-info" onclick="change_region('JP')">Japan</button>
+            <button type="button" class="btn btn-info" onclick="change_region('Other')">Other</button>
+
+            <div id="graph3"></div>
+
+            <h3>Graph 3: Top 10 Publishers with Most Video Game Titles per Genre</h2>
+                <td><br></td>
+
+       <em style="font-size: 18px;">Click on button below to change genre:</em><br />
+
+                <td>
+                    
             <button type="button" class="btn btn-info" onclick="setData('Sports')">Sports </button>
             <button type="button" class="btn btn-info" onclick="setData('Platform')">Platform</button>
             <button type="button" class="btn btn-info" onclick="setData('Racing')">Racing</button>
@@ -27,19 +50,32 @@
             <button type="button" class="btn btn-info" onclick="setData('Action')">Action</button>
             <button type="button" class="btn btn-info" onclick="setData('Fighting')">Fighting</button>
             <button type="button" class="btn btn-info" onclick="setData('Adventure')">Adventure</button>
-            <button type="button" class="btn btn-info" onclick="setData('Strategy')">Strategy</button>           
-            <div id="graph2"></div><br/>
-            <div id="graph3"></div>
-            <button type="button" class="btn btn-info" onclick="change_region('NA')">North America </button>
-            <button type="button" class="btn btn-info" onclick="change_region('EU')">Europe</button>
-            <button type="button" class="btn btn-info" onclick="change_region('JP')">Japan</button>
-            <button type="button" class="btn btn-info" onclick="change_region('Other')">Other</button>
-        </div>
-        <div class="col-lg-6">
+            <button type="button" class="btn btn-info" onclick="setData('Strategy')">Strategy</button> 
+            </td>
+
+            <td><br></td>
+            <td><br></td>
+
             <div id="graph2"></div><br/>
 
         </div>
     </div>
+    <h3> Written questions:</h3>
+
+    <p>1. My dashboard answers the presented questions by providing one visualization/graph for each question. To answer the first question, I took the “top video games” to be the video games with the most global sales. Thus, I presented a bar chart showing the top 10 most sold video games of all time, where the y-axis gives the name of the video game and the x-axis shows how many units sold there were for all-time. I also implemented a tooltip box when you hover your mouse over the bar, to give additional info on sale numbers for different regions. <br> To answer the second question, I interpreted the “most popular” genre as the genre with the most video game sales. Therefore, I separated sales per region, and used a pie-chart to represent the most popular genres for each region. The labels on the side show the top 3 genres for that region and the total sales for that genre in that region. If the user clicks on a button, they can see results for different regions.<br>  To answer the third question, I interpreted the “top publisher” for each genre to be the publisher with the most video games published for that genre. Therefore, I showed a graph with the top 10 publishers with most video game titles published for that genre. The results are sorted with the top publisher at the top. The user can click on the buttons to see results for different genres.  </p>
+    <td><br></td>
+    <p>2. One benefit of using d3 is that it provides an expansive selection of charts and graphs that you can implement. This helped me improve my visualization, as i wasn’t limited to using just one chart/graph type, but instead had a plethora of choices, which helped me choose the best chart for the situation. Another benefit of using d3 is that it has extensive documentation that is easy to follow (d3-graph-gallery), this made making the visualization much easier, as I had examples I could reference. One final benefit of using d3 is that it runs on javascript, which computationally isn’t too expensive and an easy language to read. Furthermore, javascript is supported by different web browsers which make d3 compatible with different web browsers 
+    </p>
+    <td><br></td>
+    <p>3.One reason why d3 may not be the best tool for creating a visualization is that the learning curve for learning how to use d3 can be quite steep. This is because some knowledge on javascript, HTML, web-dev is assumed, so if you don’t know much about these topics d3 might be challenging. Another reason why d3 may not be the best visualization tool is that it is a strictly web based tool, which means that d3 wouldn’t be a good option if you wanted to create visualization on a mobile app. Finally, the last  reason why d3 may not be the best visualization tool is that other data visualization libraries may be easier to understand than d3. For example, dc.js is easier to use for some people than d3, as it is a library built on top of d3 and does not require as many calculations/preliminary set up when displaying charts. Thus dc.js may be more suitable if you need a basic visualization up quickly. 
+    </p>
+    <td><br></td>
+    <p>4. Users with colored, regular vision would find this dashboard accessible, as the dashboard conveys information solely through visual cues (there is no sound at all). This means that users who are blind will be unable to understand the dashboard without some additional assistance. Thus, I need to consider more about how assistive technology can be used with my dashboard. For example, using a suggestion from the medium article “Why Accessibility Is at the Heart of Data Visualization,” my charts would benefit from the addition of “text descriptors”, as it would be useful for a screen reader, consequently allowing blind people a better opportunity to understand what the chart is showing. In addition, the same article mentions how “two or more sensory techniques” can be utilized to make a data visualization more impactful. This is why I think some sort of sound aspect to my visualization would help reiterate its message, as well as make it more accessible to the visibly impaired. In addition, I think my visualization works well to convey information to English speakers, as all the text is in English. However, this would mean that non-English speakers would have trouble understanding the visualization. Thus, I would incorporate a feature that allows the user to change the language of the dashboard to a few other common languages (e.g. Hindi, Mandarin, and Spanish). 
+    </p>
+    <td><br></td>
+    <p>5. One factor was time constraint, which prevented me from spending more hours to make the dashboard more accessible to all audiences. For example, if I had more time I would’ve added a sound component to my visualization to help aid those that are visually impaired. Another factor that prevented me from making my  dashboard more accessible was the lack of knowledge on the different groups I wanted to make the dashboard assessible to. For example, I would’ve loved to make my visualization accessible to Spanish speakers, though because I cannot speak Spanish, I was unable to translate the dashboard for Spanish speakers. The last factor that prevented me from making my dashboard more accessible is my lack of experience with d3. Because this was my first time using d3, I didn’t know how to add certain features to charts that could’ve been useful in making it more accessible. For example, I didn’t know how to add alt text/chart descriptors to graphs, though doing so would’ve been useful for blind people with screen readers. 
+    </p>
+
     <!--Feel free to add more JavaScript files as needed-->
     <script type="text/javascript" src="main.js"></script>
 </body>

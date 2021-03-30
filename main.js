@@ -8,280 +8,169 @@ let graph_1_width = (MAX_WIDTH / 2) - 10, graph_1_height = 250;
 let graph_2_width = (MAX_WIDTH / 2) - 10, graph_2_height = 275;
 let graph_3_width = MAX_WIDTH / 2, graph_3_height = 575;
 
-// Your boss wants to know the top 10 video games of all time or top 10 for a specific year 
-
 //GRAPH 1
-
 let svg = d3.select("#graph1")
     .append("svg")
-    .attr("height", MAX_HEIGHT)     // HINT: width
-    .attr("width", MAX_WIDTH - 400)     // HINT: height
+    .attr("height", MAX_HEIGHT)     
+    .attr("width", MAX_WIDTH)     
     .append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);    // HINT: transform
+    .attr("transform", `translate(${margin.left + 150}, ${margin.top})`);    
 
-    
 d3.csv("./data/video_games.csv").then(function(data) {
-    //clean data?
     data = return_top(data)
 
-    //x-axis linear scale 
-    let x = d3.scaleLinear()
-    .domain([0, d3.max(data, function(d) { return parseInt(d.Global_Sales); })])
-    .range([0, MAX_WIDTH - margin.left - margin.right]);
-/*
-    HINT: The domain and range for the linear scale map the data points
-    to appropriate screen space.
+    let x = d3.scaleLinear().range([0, MAX_WIDTH - 600]).domain([0, d3.max(data, function(d) { return d.Global_Sales; })])
+    let y = d3.scaleBand().padding(0.3).range([0, MAX_HEIGHT - 100]).domain(data.map(function(d) { return d.Name; }))
 
-    The domain is the interval of the smallest to largest data point
-    along the desired dimension. You can use the d3.max(data, function(d) {...})
-    function to get the max value in the dataset, where d refers to a single data
-    point. You can access the fields in the data point through d.count or,
-    equivalently, d["count"].
-
-    The range is the amount of space on the screen where the given element
-    should lie. We want the x-axis to appear from the left edge of the svg object
-    (location 0) to the right edge (width - margin.left - margin.right).
- */
-
-    //y-axis linear scale
-    let y = d3.scaleBand()
-        .domain(data.map(function(d) { return d.Name; }))
-        .range([0, MAX_HEIGHT - margin.top - margin.bottom])
-        .padding(0.1);  // Improves readability
-
-    svg.append("g").call(d3.axisLeft(y).tickSize(0).tickPadding(10));
+    svg.append("g").call(d3.axisLeft(y).tickSize(10).tickPadding(5));
 
     let bars = svg.selectAll("rect").data(data);
 
-    var tooltip = d3.select("body")
+    var popup_tooltip = d3.select("body")
 	.append("div")
 	.style("position", "absolute")
-	.style("visibility", "hidden")
-	.text("test");
+
+    let color = d3.scaleOrdinal(["#191945", "#26265e", "#34347d", "#4a4ab3", "#6262fc", "#9394f4", 
+    "#a0a1d6", "#bcbccd", "#c9c9d4", "#e8e8ee"])
 
     bars.enter()
     .append("rect")
     .merge(bars)
     .attr("x", x(0))
-    .attr("y", function(d) { return y(d['Name']) } ) // HINT: Use function(d) { return ...; } to apply styles based on the data point (d)
-    .attr("width", function(d) { return x(parseInt(d['Global_Sales']))})
-    .attr("height",  y.bandwidth())        // HINT: y.bandwidth() makes a reasonable display height
-	.on("mouseover", function(){return tooltip.style("visibility", "visible");})
-	.on("mousemove", function(d){return tooltip.style("top", (event.pageY-10)+"px").style("right", 20 +"px").html("<br>Total Global Sales: " + d.Global_Sales 
+    .attr("y", function(d) { return y(d['Name']) } ) 
+    .attr("width", function(d) { return x(d['Global_Sales'])})
+    .attr("fill", function(d) { return color(d['Name']) })
+    .attr("height",  y.bandwidth())        
+	.on("mouseover", function(){return popup_tooltip.style("visibility", "visible");})
+    .on("mouseout", function(){return popup_tooltip.style("visibility", "hidden");})
+    .on("mousemove", function(d){return popup_tooltip.style("left", 50 +  "px").style("top", 200 + "px").html("<br>Total Global Sales: " + d.Global_Sales 
     + "<br> NA Sales: " + d.NA_Sales + "<br>EU Sales: " + d.EU_Sales +  "<br>JP Sales: " + d.JP_Sales +  "<br>Other Sales: " + d.Other_Sales)})
-	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
-/*
-    HINT: The x and y scale objects are also functions! Calling the scale as a function can be
-    used to convert between one coordinate system to another.
-
-    To get the y starting coordinates of a data point, use the y scale object, passing in a desired
-    artist name to get its corresponding coordinate on the y-axis.
-
-    To get the bar width, use the x scale object, passing in a desired artist count to get its corresponding
-    coordinate on the x-axis.
- */
 
     let counts = svg.append("g").selectAll("text").data(data);
 
-    // TODO: Render the text elements on the DOM
     counts.enter()
         .append("text")
         .merge(counts)
-        .attr("x", function(d) { return 20 + x(parseInt(d['Global_Sales']))})       // HINT: Add a small offset to the right edge of the bar, found by x(d.count)
-        .attr("y", function(d) { return 30 + y(d['Name'])})       // HINT: Add a small offset to the top edge of the bar, found by y(d.artist)
+        .attr("x", function(d) { return 20 + x(d['Global_Sales'])})      
+        .attr("y", function(d) { return 30 + y(d['Name'])})       
         .style("text-anchor", "start")
-        .text(function(d) { return d.Global_Sales});           // HINT: Get the count of the artist
+        .text(function(d) { return d.Global_Sales});           
 
+    svg.append("text").style("font-size", 15)
+        .attr("transform", `translate(${margin.left - 150}, ${margin.top - 45})`)       
+        .text("Units Sold (Millions)")
 
-    // TODO: Add x-axis label
-    svg.append("text")
-        .attr("transform", `translate(${margin.left - 150}, ${margin.top - 45})`)       // HINT: Place this at the bottom middle edge of the graph - use translate(x, y) that we discussed earlier
-        .style("text-anchor", "right")
-        .text("Units sold (Millions)");
-
-    // TODO: Add y-axis label
-    svg.append("text")
-        .attr("transform", `translate(${margin.left - 300}, ${margin.top + 300})`)       // HINT: Place this at the center left edge of the graph - use translate(x, y) that we discussed earlier
-        .style("text-anchor", "right")
-        .text("Video Game");
-
-    // TODO: Add chart title
-    svg.append("text")
-        .attr("transform", `translate(${margin.left + 200}, ${margin.top - 50})`)       // HINT: Place this at the top middle edge of the graph - use translate(x, y) that we discussed earlier
-        .style("text-anchor", "middle")
-        .style("font-size", 20)
-        .text("Top 10 Most Sold Video Games (All-time)");
-
+    svg.append("text").style("font-size", 15)
+        .attr("transform", `translate(${margin.left - 450}, ${margin.top + 280})`)     
+        .text("Video Game")
 });
 
 //GRAPH 2
-
 let svg2 = d3.select("#graph2")
 .append("svg")
-.attr("height", MAX_HEIGHT)     // HINT: width
-.attr("width", MAX_WIDTH - 400)     // HINT: height
+.attr("height", MAX_HEIGHT)     
+.attr("width", MAX_WIDTH)     
 .append("g")
-.attr("transform", `translate(${margin.left}, ${margin.top})`);    // HINT: transform
+.attr("transform", `translate(${margin.left + 150}, ${margin.top})`);    
 
-// TODO: Add x-axis label
 svg2.append("text")
-    .attr("transform", `translate(${margin.left - 150}, ${margin.top - 45})`)       // HINT: Place this at the bottom middle edge of the graph - use translate(x, y) that we discussed earlier
+    .attr("transform", `translate(${margin.left - 150}, ${margin.top - 45})`)       
+    .text("Number of video games published")
+    .style("font-size", 15);
+
+svg2.append("text")
+    .attr("transform", `translate(${margin.left - 450}, ${margin.top + 280})`)       
     .style("text-anchor", "right")
-    .text("Number of video games");
+    .style("font-size", 15)
+    .text("Publisher");
 
-// TODO: Add y-axis label
-svg2.append("text")
-    .attr("transform", `translate(${margin.left - 300}, ${margin.top + 300})`)       // HINT: Place this at the center left edge of the graph - use translate(x, y) that we discussed earlier
-    .style("text-anchor", "right")
-    .text("Company");
-
-// TODO: Add chart title
-svg2.append("text")
-    .attr("transform", `translate(${margin.left + 200}, ${margin.top - 60})`)       // HINT: Place this at the top middle edge of the graph - use translate(x, y) that we discussed earlier
+var graph2_title = svg2.append("text")
+    .attr("transform", `translate(${margin.left + 250}, ${margin.top - 60})`)       
     .style("text-anchor", "middle")
     .style("font-size", 20)
-    .text("Top 10 companies with most video game titles for a given genre (^^^click on buttons above to change genre)");
 
 let y_axis_label = svg2.append("g");
 
+
 function setData(genre) {
+
+    graph2_title.text("Showing top publishers for: " + genre)
 
     d3.csv("./data/video_games.csv").then(function(data) {
         
-        //clean data?
         full_data = top_publisher(data)
         data = full_data.get(genre)
 
-        //x-axis linear scale 
-        let x = d3.scaleLinear()
-        .domain([0, d3.max(data, function(d) { return parseInt(d.num_titles); })])
-        .range([0, MAX_WIDTH - margin.left - margin.right]);
-    /*
-        HINT: The domain and range for the linear scale map the data points
-        to appropriate screen space.
+        let x = d3.scaleLinear().range([0, MAX_WIDTH - 700]).domain([0, d3.max(data, function(d) { return d.num_titles; })])
+        let y = d3.scaleBand().padding(0.3).domain(data.map(function(d) { return d.publisher_name; })).range([0, MAX_HEIGHT - 100])
 
-        The domain is the interval of the smallest to largest data point
-        along the desired dimension. You can use the d3.max(data, function(d) {...})
-        function to get the max value in the dataset, where d refers to a single data
-        point. You can access the fields in the data point through d.count or,
-        equivalently, d["count"].
-
-        The range is the amount of space on the screen where the given element
-        should lie. We want the x-axis to appear from the left edge of the svg object
-        (location 0) to the right edge (width - margin.left - margin.right).
-    */
-
-        //y-axis linear scale
-        let y = d3.scaleBand()
-            .domain(data.map(function(d) { return d.publisher_name; }))
-            .range([0, MAX_HEIGHT - margin.top - margin.bottom])
-            .padding(0.1);  // Improves readability
-
-        y_axis_label.call(d3.axisLeft(y).tickSize(0).tickPadding(10));
-
+        y_axis_label.call(d3.axisLeft(y).tickSize(10).tickPadding(10));
 
         let bars = svg2.selectAll("rect").data(data);
 
-        var tooltip = d3.select("body")
-        .append("div")
-        .style("position", "absolute")
-        .style("visibility", "hidden")
-        .text("test");
-
+        let color = d3.scaleOrdinal(["#191945", "#26265e", "#34347d", "#4a4ab3", "#6262fc", "#9394f4", 
+        "#a0a1d6", "#bcbccd", "#c9c9d4", "#e8e8ee"])
         bars.enter()
         .append("rect")
         .merge(bars)
         .attr("x", x(0))
-        .attr("y", function(d) { return y(d['publisher_name']) } ) // HINT: Use function(d) { return ...; } to apply styles based on the data point (d)
-        .attr("width", function(d) { return x(parseInt(d['num_titles']))})
-        .attr("height",  y.bandwidth());       // HINT: y.bandwidth() makes a reasonable display height
-    /*
-        HINT: The x and y scale objects are also functions! Calling the scale as a function can be
-        used to convert between one coordinate system to another.
-
-        To get the y starting coordinates of a data point, use the y scale object, passing in a desired
-        artist name to get its corresponding coordinate on the y-axis.
-
-        To get the bar width, use the x scale object, passing in a desired artist count to get its corresponding
-        coordinate on the x-axis.
-    */
-
-        let counts = svg2.append("g").selectAll("text").data(data);
-
-        // TODO: Render the text elements on the DOM
-        counts.enter()
-            .append("text")
-            .merge(counts)
-            .attr("x", function(d) { return  x(parseInt(d['num_titles']))})       // HINT: Add a small offset to the right edge of the bar, found by x(d.count)
-            .attr("y", function(d) { return  y(d['publisher_name'])})       // HINT: Add a small offset to the top edge of the bar, found by y(d.artist)
-            .style("text-anchor", "start")
-            .text(function(d) { return d.Global_Sales});           // HINT: Get the count of the artist
-
+        .attr("y", function(d) { return y(d['publisher_name']) } ) 
+        .attr("fill", function(d) { return color(d['publisher_name']) })
+        .attr("width", function(d) { return x(d['num_titles'])})
+        .attr("height",  y.bandwidth());   
     });
 }
 
-//Graph 3  Genre sales per region
-//reference: https://www.tutorialsteacher.com/d3js/create-pie-chart-using-d3js
-
-
+//Graph 3
 width = MAX_WIDTH 
 height = MAX_HEIGHT - 200
-radius = Math.min(width, height) / 2
+min_val = Math.min(width, height)
 
 let svg3 = d3.select("#graph3")
 .append("svg")
-.attr("height", MAX_HEIGHT)     // HINT: width
-.attr("width", MAX_WIDTH)     // HINT: height
+.attr("height", MAX_HEIGHT)     
+.attr("width", MAX_WIDTH)     
 .append("g")
-.attr("transform", `translate(${margin.left - 100}, ${margin.top + 50})`);    // HINT: transform
-
+.attr("transform", `translate(${margin.left - 100}, ${margin.top + 50})`);    
 
 var title = svg3.append("text")
-.attr("transform", `translate(${margin.left + 300}, ${margin.top - 100})`)       // HINT: Place this at the top middle edge of the graph - use translate(x, y) that we discussed earlier
-.style("text-anchor", "middle")
+.attr("transform", `translate(${margin.left + 460}, ${margin.top - 100})`)       
 .style("font-size", 25)
 
 var genre3 = svg3.append("text")
-.attr("transform", `translate(${margin.left - 100}, ${margin.top - 40})`)       // HINT: Place this at the top middle edge of the graph - use translate(x, y) that we discussed earlier
+.attr("transform", `translate(${margin.left - 100}, ${margin.top - 40})`)       
 .style("text-anchor", "middle")
 .style("font-size", 15)
-.text("1. Sports")
+
 var genre1 = svg3.append("text")
-.attr("transform", `translate(${margin.left - 100}, ${margin.top - 100})`)       // HINT: Place this at the top middle edge of the graph - use translate(x, y) that we discussed earlier
+.attr("transform", `translate(${margin.left - 100}, ${margin.top - 100})`)       
 .style("text-anchor", "middle")
 .style("font-size", 15)
-.text("1. Sports")
 
 var genre2 = svg3.append("text")
-.attr("transform", `translate(${margin.left - 100}, ${margin.top - 70})`)       // HINT: Place this at the top middle edge of the graph - use translate(x, y) that we discussed earlier
+.attr("transform", `translate(${margin.left - 100}, ${margin.top - 70})`)       
 .style("text-anchor", "middle")
 .style("font-size", 15)
-.text("1. Sports")
 
-g = svg3.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+half_w = width / 2
+half_h = height / 2
+pie_translate = "translate(" + half_w + "," + half_h + ")"
 
-var color = d3.scaleOrdinal(['#084c61','#db504a','#e3b505','#4f6d7a','#56a3a6']).domain(["Sports", "Platform", "Racing",
-"Role-Playing", "Puzzle", "Misc", "Shooter", "Simulation", "Action",
-"Fighting", "Adventure", "Strategy"])
+g = svg3.append("g").attr("transform", pie_translate);
 
-var label = d3.arc()
-.outerRadius(radius + 20)
-.innerRadius(radius - 150);
+let color = d3.scaleOrdinal(["#1c1b2e", "#191945", "#26265e", "#34347d", "#4a4ab3", "#6262fc", "#9394f4", 
+"#a0a1d6","#bcbccd", "#c9c9d4"])
 
-// Generate the pie
+var genre_text = d3.arc()
+.outerRadius(min_val / 2 + 20)
+.innerRadius(min_val / 2 - 150);
+
 var pie = d3.pie();
 
-// Generate the arcs
-var arc = d3.arc()
-    .innerRadius(0)
-    .outerRadius(radius);
-
-// A function that create / update the plot for a given variable:
 function change_region(region) {
     d3.csv("./data/video_games.csv").then(function(data) {
         full_data = top_genres(data)
         data = full_data.get(region)
-        console.log(data)
 
         sales_arr = new Array ()
         genres_arr = new Array ()
@@ -291,26 +180,19 @@ function change_region(region) {
             genres_arr.push(data[i].genre_name)
         }
 
-        //Generate groups
-            var arcs = g.selectAll("arc")
-            .data(pie(sales_arr))
-            .enter()
-            .append("g")
-            .attr("class", "arc")
+        var all_arc = g.selectAll("arc")
+        .data(pie(sales_arr))
+        .enter()
+        .append("g")
 
-        //Draw arc paths
-        arcs.append("path")
-        .attr("fill", function(d, i) {
-        return color(i);
-        })
-        .attr("d", arc);
+        all_arc.append("path").attr("d", d3.arc().outerRadius(min_val / 2).innerRadius(130)).attr("fill", function(_, index_val) {return color(index_val)})
 
-        arcs.append("text")
+        all_arc.append("text")
         .attr("transform", function(d) { 
-                 return "translate(" + label.centroid(d) + ")"; 
+                 return "translate(" + genre_text.centroid(d) + ")"
          })
-        .text(function(d) {return genres_arr[d.index]; });
-
+        .text(function(d) {return genres_arr[d.index]; })
+        .style('fill', 'white')
 
         let region_dict = new Map();
 
@@ -324,21 +206,8 @@ function change_region(region) {
         genre1.text("1. " + genres_arr[0] + " - " + parseInt(sales_arr[0]) + " million sales (all time)")
         genre2.text("2. " + genres_arr[1] + " - " + parseInt(sales_arr[1]) + " million sales (all time)")
         genre3.text("3. " + genres_arr[2] + " - " + parseInt(sales_arr[2]) + " million sales (all time)")
-
-    //   remove the group that is not present anymore
-      arcs
-        .exit()
-        .remove()
-    
     })
 }
-
-// Your boss wants to understand which genre is most popular. We'd like to see genre sales broken out per region. 
-//(This question can be answered by showing the top genre in each region if you want to implement a map, 
-// otherwise you should show genre sales broken down by region in bar/scatter/line/pie etc.)
-
-// Lastly, your boss wants to know which publisher to pick based on which genre a game is. 
-// Your chart should provide a clear top publisher for each genre (could be interactive or statically show).
 
 function return_top(data) {
 
@@ -431,8 +300,6 @@ function top_genres(data) {
 }
 
 function top_publisher(data) {
-    //iterate through data 
-    top_genres(data)
     let genre_dict = new Map();
 
     n = data.length
@@ -459,8 +326,6 @@ function top_publisher(data) {
 
     }
     let output_dict = new Map()
-    //dict of all genres where val = {publisher, titles_count}
-    // console.log(genre_dict)
     
     for (let [genre, value] of genre_dict) {
         var genre_arr = new Array()
@@ -482,4 +347,4 @@ function top_publisher(data) {
 }
 
 change_region("NA")
-setData("Platform")
+setData("Sports")
